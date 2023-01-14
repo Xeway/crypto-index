@@ -22,6 +22,15 @@ contract CryptoIndex {
     ISwapRouter public immutable swapRouter;
 
     constructor(Token[] calldata _tokens, address _quoteToken, uint _amount, ISwapRouter _swapRouter) {
+        // we verify that the list of token doesn't contains the quote token
+        // other it would swap the same token which throws an error
+        for (uint i = 0; i < _tokens.length; ++i) {
+            if (_tokens[i] == _quoteToken) {
+                _tokens[i] = _tokens[_tokens.length - 1];
+                _tokens.pop();
+            }
+        }
+
         tokens = _tokens;
         quoteToken = _quoteToken;
         swapRouter = _swapRouter;
@@ -31,17 +40,21 @@ contract CryptoIndex {
         }
     }
 
-    function buyTokens(uint _amount) private {
+    function buyTokens(uint _amount) public {
         TransferHelper.safeTransferFrom(quoteToken, msg.sender, address(this), _amount);
 
-        TransferHelper.safeApprove(DAI, address(swapRouter), amountIn);
+        ISwapRouter m_swapRouter = swapRouter;
 
-        for (uint i = 0; i < tokens.length; ++i) {
-            uint amountIn = msg.value / 10000 * tokens[i].percentage;
+        TransferHelper.safeApprove(DAI, address(m_swapRouter), amountIn);
+
+        Token[] m_tokens = tokens;
+
+        for (uint i = 0; i < m_tokens.length; ++i) {
+            uint amountIn = msg.value / 10000 * m_tokens[i].percentage;
 
             ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
                 tokenIn: USDC,
-                tokenOut: tokens[i].addr,
+                tokenOut: m_tokens[i].addr,
                 fee: poolFee,
                 recipient: address(this),
                 deadline: block.timestamp,
@@ -50,8 +63,8 @@ contract CryptoIndex {
                 sqrtPriceLimitX96: 0
             });
 
-            amountOut = swapRouter.exactInputSingle(params);
-            shares[msg.sender][tokens[i].addr] += amountOut;
+            amountOut = m_swapRouter.exactInputSingle(params);
+            shares[msg.sender][m_tokens[i].addr] += amountOut;
         }
     }
 }
