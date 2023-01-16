@@ -25,13 +25,11 @@ contract CryptoIndex {
         // we verify that the list of token doesn't contains the quote token
         // other it would swap the same token which throws an error
         for (uint i = 0; i < _tokens.length; ++i) {
-            if (_tokens[i].addr == _quoteToken) {
-                _tokens[i] = _tokens[_tokens.length - 1];
-                delete _tokens[_tokens.length - 1];
+            if (_tokens[i].addr != _quoteToken) {
+                tokens.push(_tokens[i]);
             }
         }
 
-        tokens = _tokens;
         quoteToken = _quoteToken;
         swapRouter = ISwapRouter(_swapRouter);
 
@@ -53,7 +51,7 @@ contract CryptoIndex {
 
         Token[] memory m_tokens = tokens;
 
-        for (uint i = 0; i < ((m_tokens[m_tokens.length - 1].addr != address(0)) ? m_tokens.length : m_tokens.length - 1); ++i) {
+        for (uint i = 0; i < m_tokens.length; ++i) {
             uint amountIn = _amount / 10000 * m_tokens[i].percentage;
 
             ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
