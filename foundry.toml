@@ -1,9 +1,10 @@
 [profile.default]
 src = 'contracts'
-test='test-foundry'
-script='scripts-foundry'
+test='test/foundry'
+script='scripts/foundry'
 out = 'out'
 libs = ['lib']
+cache_path='forge-cache'
 remappings = ['forge-std=lib/forge-std/src', '@openzeppelin=lib/openzeppelin-contracts', '@uniswap/v3-periphery=lib/v3-periphery', '@uniswap/v3-core=lib/v3-core']
 optimizer = true
 optimizer_runs = 20_000
