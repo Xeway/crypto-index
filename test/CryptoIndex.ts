@@ -3,6 +3,8 @@ import { expect } from "chai";
 describe("CryptoIndex", function () {
     describe("Deployment", function() {
         it("should deploy", async function() {
+            const [owner, otherAccount] = await hre.ethers.getSigners();
+
             const tokens: [string, number][] = [
                 ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", 1000], // UNI - 10%
                 ["0x514910771AF9Ca656af840dff83E8264EcF986CA", 1000], // LINK - 10%
@@ -24,6 +26,8 @@ describe("CryptoIndex", function () {
                 "0xE592427A0AEce92De3Edee1F18E0157C05861564", // SwapRouter
                 { gasLimit: 3000000 }
             );
+
+            console.log("Deployed contract with account : " + owner.address);
 
             expect((await cryptoIndex.quoteToken()).to.equal("0x7EA2be2df7BA6E54B1A9C70676f668455E329d29"));
         });
