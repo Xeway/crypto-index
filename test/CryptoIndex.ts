@@ -1,5 +1,9 @@
 import { expect } from "chai";
 
+function giveToken(tokenAddress, whale, recipient) {
+    
+}
+
 describe("CryptoIndex", function () {
     describe("Deployment", function() {
         it("should deploy", async function() {
