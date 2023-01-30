@@ -1,13 +1,22 @@
 import { expect } from "chai";
+import erc20ABI from "../erc20.abi.json";
+import { interfaces } from "../typechain-types/lib/v3-core/contracts";
 
-function giveToken(tokenAddress, whale, recipient) {
-    
+async function giveToken(tokenAddress: string, whales: string[], recipient): string {
+    for (let whale of whales) {
+        const impersonatedSigner = await ethers.getImpersonatedSigner(whale);
+        const erc20 = new ethers.Contract(tokenAddress, erc20ABI, impersonatedSigner);
+
+        erc20.transfer(recipient, erc20.balanceOf(whale));
+    }
 }
 
 describe("CryptoIndex", function () {
     describe("Deployment", function() {
         it("should deploy", async function() {
             const [owner, otherAccount] = await hre.ethers.getSigners();
+
+            // giveToken("0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", ["0x4da27a545c0c5B758a6BA100e3a049001de870f5"], owner.address);
 
             const tokens: [string, number][] = [
                 ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", 1000], // UNI - 10%
