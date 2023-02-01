@@ -2,7 +2,7 @@ import { expect } from "chai";
 import erc20ABI from "../erc20.abi.json";
 import { interfaces } from "../typechain-types/lib/v3-core/contracts";
 
-async function giveToken(tokenAddress: string, whales: string[], recipient): string {
+async function giveToken(tokenAddress: string, whales: string[], recipient: string) {
     for (let whale of whales) {
         const impersonatedSigner = await ethers.getImpersonatedSigner(whale);
         const erc20 = new ethers.Contract(tokenAddress, erc20ABI, impersonatedSigner);
