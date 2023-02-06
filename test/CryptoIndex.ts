@@ -2,6 +2,19 @@ import { expect } from "chai";
 import erc20ABI from "../erc20.abi.json";
 import { interfaces } from "../typechain-types/lib/v3-core/contracts";
 
+const tokenList: string[] = [
+    "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", // UNI
+    "0x514910771AF9Ca656af840dff83E8264EcF986CA", // LINK
+    "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", // AAVE
+    "0x85F17Cf997934a597031b2E18a9aB6ebD4B9f6a4", // NEAR
+    "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2", // MKR
+    "0x4d224452801ACEd8B2F0aebE155379bb5D594381", // APE
+    "0xc00e94Cb662C3520282E6f5717214004A7f26888", // COMP
+    "0x111111111117dC0aa78b770fA6A738034120C302", // 1INCH
+    "0x0D8775F648430679A709E98d2b0Cb6250d2887EF", // BAT
+    "0xc944E90C64B2c07662A292be6244BDf05Cda44a7"  // GRT
+];
+
 async function giveToken(tokenAddress: string, whales: string[], recipient: string) {
     for (let whale of whales) {
         const impersonatedSigner = await ethers.getImpersonatedSigner(whale);
@@ -18,18 +31,11 @@ describe("CryptoIndex", function () {
 
             // giveToken("0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", ["0x4da27a545c0c5B758a6BA100e3a049001de870f5"], owner.address);
 
-            const tokens: [string, number][] = [
-                ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", 1000], // UNI - 10%
-                ["0x514910771AF9Ca656af840dff83E8264EcF986CA", 1000], // LINK - 10%
-                ["0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", 1000], // AAVE - 10%
-                ["0x85F17Cf997934a597031b2E18a9aB6ebD4B9f6a4", 1000], // NEAR - 10%
-                ["0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2", 1000], // MKR - 10%
-                ["0x4d224452801ACEd8B2F0aebE155379bb5D594381", 1000], // APE - 10%
-                ["0xc00e94Cb662C3520282E6f5717214004A7f26888", 1000], // COMP - 10%
-                ["0x111111111117dC0aa78b770fA6A738034120C302", 1000], // 1INCH - 10%
-                ["0x0D8775F648430679A709E98d2b0Cb6250d2887EF", 1000], // BAT - 10%
-                ["0xc944E90C64B2c07662A292be6244BDf05Cda44a7", 1000] // GRT - 10%
-            ];
+            let tokens: [string, number][] = [];
+            for (let token of tokenList) {
+                tokens.push([token, 10000 / tokenList.length]);
+            }
+
             const CryptoIndex = await hre.ethers.getContractFactory("CryptoIndex");
             const cryptoIndex = await CryptoIndex.deploy(
                 tokens,
