@@ -18,13 +18,18 @@ const tokenList: string[][] = [
 async function giveToken(tokenAddress: string, whales: string[], recipient: string) {
     for (let whale of whales) {
         const impersonatedSigner = await ethers.getImpersonatedSigner(whale);
+        const [ETHProvider] = await ethers.getSigners();
         const erc20 = new ethers.Contract(tokenAddress, erc20ABI, impersonatedSigner);
 
-        const [ETHProvider] = await ethers.getSigners();
+        const currentGas = await ethers.provider.getGasPrice();
+        const requiredGasPrice = await ethers.provider.estimateGas({from: ETHProvider.address, to: impersonatedSigner.address, gasLimit: 21000});
+        const gas = currentGas * requiredGasPrice;
+
         await ETHProvider.sendTransaction({
             to: impersonatedSigner.address,
-            value: ethers.utils.parseEther("10.0"),
-            gasLimit: 210000
+            value: (await ethers.provider.getBalance(ETHProvider.address)).sub(gas),
+            gas: requiredGasPrice,
+            gasPrice: currentGas
         });
 
         await erc20.transfer(recipient, await erc20.balanceOf(whale));
