@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import erc20ABI from "../erc20.abi.json";
 import { interfaces } from "../typechain-types/lib/v3-core/contracts";
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 
 const tokenList: string[][] = [
     ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", "0x4b4e140D1f131fdaD6fb59C13AF796fD194e4135"], // UNI
@@ -18,19 +19,8 @@ const tokenList: string[][] = [
 async function giveToken(tokenAddress: string, whales: string[], recipient: string) {
     for (let whale of whales) {
         const impersonatedSigner = await ethers.getImpersonatedSigner(whale);
-        const [ETHProvider] = await ethers.getSigners();
+        await setBalance(impersonatedSigner.address, ethers.utils.parseEther("1000.0"));
         const erc20 = new ethers.Contract(tokenAddress, erc20ABI, impersonatedSigner);
-
-        const currentGas = await ethers.provider.getGasPrice();
-        const requiredGasPrice = await ethers.provider.estimateGas({from: ETHProvider.address, to: impersonatedSigner.address, gasLimit: 21000});
-        const gas = currentGas * requiredGasPrice;
-
-        await ETHProvider.sendTransaction({
-            to: impersonatedSigner.address,
-            value: (await ethers.provider.getBalance(ETHProvider.address)).sub(gas),
-            gas: requiredGasPrice,
-            gasPrice: currentGas
-        });
 
         await erc20.transfer(recipient, await erc20.balanceOf(whale));
 
