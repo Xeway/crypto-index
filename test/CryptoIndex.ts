@@ -3,6 +3,7 @@ import erc20ABI from "../erc20.abi.json";
 import { interfaces } from "../typechain-types/lib/v3-core/contracts";
 import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 
+// [token address, whale address]
 const tokenList: string[][] = [
     ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", "0x4b4e140D1f131fdaD6fb59C13AF796fD194e4135"], // UNI
     ["0x514910771AF9Ca656af840dff83E8264EcF986CA", "0x9BBb46637A1Df7CADec2AFcA19C2920CdDCc8Db8"], // LINK
@@ -24,14 +25,25 @@ async function giveToken(tokenAddress: string, whales: string[], recipient: stri
 
         await erc20.transfer(recipient, await erc20.balanceOf(whale));
 
-        console.log(`${tokenAddress} transferred to ${recipient}, owner's balance : ${await erc20.balanceOf(recipient)}`);
+        let symbol;
+        try {
+            symbol = await erc20.symbol();
+        } catch (e) {
+            try {
+                symbol = await erc20.name();
+            } catch (e) {
+                symbol = "UNKNOWN";
+            }
+        }
+
+        console.log(`${tokenAddress} transferred to ${recipient}, owner's balance (${symbol}) : ${await erc20.balanceOf(recipient)}`);
     }
 }
 
 describe("CryptoIndex", function () {
     describe("Deployment", function() {
         it("should deploy", async function() {
-            const [owner, otherAccount] = await hre.ethers.getSigners();
+            const [owner] = await hre.ethers.getSigners();
 
             let tokens: [string, number][] = [];
             for (let token of tokenList) {
@@ -39,11 +51,16 @@ describe("CryptoIndex", function () {
                 tokens.push([token[0], 10000 / tokenList.length]);
             }
 
+            const quoteToken = "0x7EA2be2df7BA6E54B1A9C70676f668455E329d29"; // USDC
+            const amountQuoteToken = 3500
+
+            await giveToken(quoteToken, ["0x5E583B6a1686f7Bc09A6bBa66E852A7C80d36F00"], owner.address);
+
             const CryptoIndex = await hre.ethers.getContractFactory("CryptoIndex");
             const cryptoIndex = await CryptoIndex.deploy(
                 tokens,
-                "0x7EA2be2df7BA6E54B1A9C70676f668455E329d29", // USDC
-                3500000000, // 3500 USDC
+                quoteToken,
+                amountQuoteToken*(10**6),
                 3000, // 0.3% fees
                 "0xE592427A0AEce92De3Edee1F18E0157C05861564", // SwapRouter
                 { gasLimit: 3000000 }
