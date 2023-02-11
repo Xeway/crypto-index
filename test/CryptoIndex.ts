@@ -52,18 +52,26 @@ describe("CryptoIndex", function () {
             }
 
             const quoteToken = "0x7EA2be2df7BA6E54B1A9C70676f668455E329d29"; // USDC
-            const amountQuoteToken = 3500
+            const amountQuoteToken = 3500;
 
             await giveToken(quoteToken, ["0x5E583B6a1686f7Bc09A6bBa66E852A7C80d36F00"], owner.address);
+
+            const quoteContract = new ethers.Contract(quoteToken, erc20ABI, owner);
 
             const CryptoIndex = await hre.ethers.getContractFactory("CryptoIndex");
             const cryptoIndex = await CryptoIndex.deploy(
                 tokens,
                 quoteToken,
-                amountQuoteToken*(10**6),
-                3000, // 0.3% fees
                 "0xE592427A0AEce92De3Edee1F18E0157C05861564", // SwapRouter
                 { gasLimit: 3000000 }
+            );
+
+            const amountToGive = amountQuoteToken*(10**(await quoteContract.decimals()));
+
+            await quoteContract.approve(cryptoIndex.address, amountToGive);
+            await cryptoIndex.buyTokens(
+                amountToGive,
+                3000, // 0.3% fees
             );
 
             console.log("Deployed contract with account : " + owner.address);

@@ -21,7 +21,7 @@ contract CryptoIndex {
 
     ISwapRouter public immutable swapRouter;
 
-    constructor(Token[] memory _tokens, address _quoteToken, uint _amount, uint24 _fee, address _swapRouter) {
+    constructor(Token[] memory _tokens, address _quoteToken, address _swapRouter) {
         // we verify that the list of token doesn't contains the quote token
         // other it would swap the same token which throws an error
         for (uint i = 0; i < _tokens.length; ++i) {
@@ -32,10 +32,6 @@ contract CryptoIndex {
 
         quoteToken = _quoteToken;
         swapRouter = ISwapRouter(_swapRouter);
-
-        if (_amount > 0) {
-            buyTokens(_amount, _fee);
-        }
     }
 
     function buyTokens(uint _amount, uint24 _poolFee) public {
