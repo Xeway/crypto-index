@@ -54,7 +54,7 @@ describe("CryptoIndex", function () {
             const quoteToken = "0x7EA2be2df7BA6E54B1A9C70676f668455E329d29"; // USDC
             const amountQuoteToken = 3500;
 
-            await giveToken(quoteToken, ["0x5E583B6a1686f7Bc09A6bBa66E852A7C80d36F00"], owner.address);
+            await giveToken(quoteToken, ["0x5E583B6a1686f7Bc09A6bBa66E852A7C80d36F00"], owner.address); // get USDC from whale
 
             const quoteContract = new ethers.Contract(quoteToken, erc20ABI, owner);
 
