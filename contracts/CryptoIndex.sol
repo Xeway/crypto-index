@@ -34,7 +34,7 @@ contract CryptoIndex {
         swapRouter = ISwapRouter(_swapRouter);
     }
 
-    function buyTokens(uint _amount, uint24 _poolFee) public {
+    function buyTokens(uint _amount, uint24 _poolFee) external {
         address m_quoteToken = quoteToken;
 
         // Transfer the specified amount of DAI to this contract.
